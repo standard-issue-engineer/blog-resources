@@ -8,81 +8,81 @@ permissions:
   contents: read
 
 jobs:
-  hosted-agent-http-smi:
-    runs-on: ubuntu-latest
+  # hosted-agent-http-smi:
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          submodules: true
-          lfs: false
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+  #       with:
+  #         submodules: true
+  #         lfs: false
 
-      - name: Get MI token (inline)
-        shell: pwsh
-        run: |
-          $headers=@{"Metadata"="true"}
-          $ProgressPreference = "SilentlyContinue"
-          $response = Invoke-WebRequest -UseBasicParsing -Uri "http://169.254.169.254/metadata/identity/oauth2/token?resource=https://storage.azure.com/&api-version=2019-08-01" -Headers $headers
-          $response.StatusCode
+  #     - name: Get MI token (inline)
+  #       shell: pwsh
+  #       run: |
+  #         $headers=@{"Metadata"="true"}
+  #         $ProgressPreference = "SilentlyContinue"
+  #         $response = Invoke-WebRequest -UseBasicParsing -Uri "http://169.254.169.254/metadata/identity/oauth2/token?resource=https://storage.azure.com/&api-version=2019-08-01" -Headers $headers
+  #         $response.StatusCode
 
-      - name: Get MI token (script)
-        shell: pwsh
-        run: |
-          ./scripts/get-managed-identity-token.ps1
+  #     - name: Get MI token (script)
+  #       shell: pwsh
+  #       run: |
+  #         ./scripts/get-managed-identity-token.ps1
 
-  hosted-agent-az-smi:
-    runs-on: ubuntu-latest
+  # hosted-agent-az-smi:
+  #   runs-on: ubuntu-latest
     
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          submodules: true
-          lfs: false
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+  #       with:
+  #         submodules: true
+  #         lfs: false
 
-      # System-assigned managed identity authentication with Azure CLI Action
-      - name: Azure Login with SMI
-        uses: azure/login@v2
-        with:
-          auth-type: IDENTITY
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          enable-AzPSSession: true
+  #     # System-assigned managed identity authentication with Azure CLI Action
+  #     - name: Azure Login with SMI
+  #       uses: azure/login@v2
+  #       with:
+  #         auth-type: IDENTITY
+  #         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+  #         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  #         enable-AzPSSession: true
 
-      - name: Test credentials
-        uses: azure/cli@v2
-        with:
-          azcliversion: latest
-          inlineScript: |
-            az account show
+  #     - name: Test credentials
+  #       uses: azure/cli@v2
+  #       with:
+  #         azcliversion: latest
+  #         inlineScript: |
+  #           az account show
 
-  hosted-agent-az-umi:
-    runs-on: ubuntu-latest
+  # hosted-agent-az-umi:
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          submodules: true
-          lfs: false
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+  #       with:
+  #         submodules: true
+  #         lfs: false
 
-      # User-assigned managed identity authentication with Azure CLI Action
-      - name: Azure login with UMI
-        uses: azure/login@v2
-        with:
-          auth-type: IDENTITY
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          enable-AzPSSession: true
+  #     # User-assigned managed identity authentication with Azure CLI Action
+  #     - name: Azure login with UMI
+  #       uses: azure/login@v2
+  #       with:
+  #         auth-type: IDENTITY
+  #         client-id: ${{ secrets.AZURE_CLIENT_ID }}
+  #         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+  #         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  #         enable-AzPSSession: true
 
-      - name: Test credentials
-        uses: azure/cli@v2
-        with:
-          azcliversion: latest
-          inlineScript: |
-            az account show
+  #     - name: Test credentials
+  #       uses: azure/cli@v2
+  #       with:
+  #         azcliversion: latest
+  #         inlineScript: |
+  #           az account show
 
   hosted-agent-az-sp:
     runs-on: ubuntu-latest
@@ -103,7 +103,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           enable-AzPSSession: true
 
-      - name: Test credentials
+      - name: Test credentials (az inline)
         uses: azure/cli@v2
         with:
           azcliversion: latest
@@ -111,3 +111,13 @@ jobs:
             az account show
             # echo "test" > some_file.txt
             # az storage blob upload -f some_file.txt -c mycontainer -n MyBlob
+
+      - name: Test credentials (run inline)
+        shell: pwsh
+        run: |
+          az account show
+
+      - name: Test credentials (run script)
+        shell: pwsh
+        run: |
+          scripts/az-account-show.ps1
